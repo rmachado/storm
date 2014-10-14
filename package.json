@@ -1,0 +1,31 @@
+{
+  "name": "storm",
+  "version": "0.0.0",
+  "description": "Simple TDS ORM",
+  "main": "index.js",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rmachado/storm.git"
+  },
+  "keywords": [
+    "orm",
+    "sql",
+    "server",
+    "mssql",
+    "tedious"
+  ],
+  "author": "Rodrigo Machado",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rmachado/storm/issues"
+  },
+  "homepage": "https://github.com/rmachado/storm",
+  "dependencies": {
+    "underscore": "^1.7.0",
+    "tedious": "^1.5.6",
+    "bluebird": "^2.3.5"
+  }
+}
