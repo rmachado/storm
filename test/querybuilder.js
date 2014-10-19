@@ -124,6 +124,31 @@ describe('SELECT', function(){
     expect(query._generateSQL()).to.be.equal(sql);
   });
 
+  it('should generate a complete query with all the options included by ' +
+     'calling the Query constructor', function(){
+    query = new Query('select', {
+      select: ['name', 'active'],
+      into: 'MyReport',
+      from: 'User',
+      where: {
+        'type': { name: 'typeClient', value: 'client'},
+        'verified': { name: 'isVerified', value: 'verified' }
+      },
+      groupBy: 'birth_date',
+      having: {
+        'birth_date': { name: 'birthDate', value: new Date(1990, 1, 1) }
+      },
+      sort: ['name', { column: 'active', order: 'desc' }],
+      limit: 5,
+      skip: 10,
+    });
+
+    var sql = 'select top 5 [Name], [Active] into [MyReport] from [User] ' +
+      'where [Type]=@typeClient and [Verified]=@isVerified group by [BirthDate] ' +
+      'having [BirthDate]=@birthDate order by [Name] asc, [Active] desc offset 10 rows;';
+    expect(query._generateSQL()).to.be.equal(sql);
+  });
+
   it('should generate a query using query operators', function(){
     query.where({
       $or: [
