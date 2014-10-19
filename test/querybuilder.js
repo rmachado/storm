@@ -124,6 +124,32 @@ describe('SELECT', function(){
     expect(query._generateSQL()).to.be.equal(sql);
   });
 
+  it('should generate a query using query operators', function(){
+    query.where({
+      $or: [
+        { 'type': { name: 'typeBusiness', value: 'business' }},
+        { 'type': { name: 'typeClient', value: 'client' },
+          'verified': { name: 'isVerified', value: true }
+        }
+      ],
+      'name': { $null: false },
+      'age': { $gte: { name: 'minAge', value: 18},
+               $lt: { name: 'maxAge', value: 50 } },
+      'active': { name: 'isActive', value: true },
+      'alert_level': [{ name: 'lowLevel', value: 1 },
+                      { name: 'mediumLevel', value: 2 }],
+      'status': { $nin: [{ name: 'statusBlocked', value: 'blocked'},
+                         { name: 'statusDeleted', value: 'deleted' }]}
+    });
+
+    var sql = 'select * from [User] where ([Type]=@typeBusiness or ' +
+      '[Type]=@typeClient and [Verified]=@isVerified) and ([Name] is not null) ' +
+      'and ([Age]>=@minAge and [Age]<@maxAge) and [Active]=@isActive and ' +
+      '[AlertLevel] in (@lowLevel, @mediumLevel) and ([Status] not in ' +
+      '(@statusBlocked, @statusDeleted));'
+    expect(query._generateSQL()).to.be.equal(sql);
+  });
+
 });
 
 /* jshint ignore:end */
