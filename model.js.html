@@ -71,9 +71,9 @@
       <div class="row">
         <div class="span3 bs-docs-sidebar">
           <ul class="nav nav-list bs-docs-sidenav affix-top">
-            <li class="active"><a href="index.html">Main</a></li>
+            <li><a href="index.html">Main</a></li>
             <li><a href="document.js.html">document.js</a></li>
-            <li><a href="model.js.html">model.js</a></li>
+            <li class="active"><a href="model.js.html">model.js</a></li>
             <li><a href="query.js.html">query.js</a></li>
             <li><a href="querybuilder.js.html">querybuilder.js</a></li>
             <li><a href="utils.js.html">utils.js</a></li>
@@ -84,8 +84,50 @@
           </div>
         </div>
         <div class="span9">
-          <section id="Main"><h1>storm</h1>
-<p>Simple TDS ORM</p></section>
+          <div class="description"> </div>
+          <pre><code class="language-javascript">'use strict';
+
+var Model = function (schema, options) {
+
+};
+
+Model.prototype.create = function(obj) {
+
+};
+
+Model.prototype.findById = function(id, options) {
+
+};
+
+Model.prototype.find = function(query, options) {
+
+};
+
+Model.prototype.findOne = function(query, options) {
+
+};
+
+Model.prototype.remove = function(query) {
+
+};
+
+Model.prototype.update = function(query, updates) {
+
+};
+
+Model.prototype.findByIdAndUpdate = function(query, updates) {
+
+};
+
+Model.prototype.count = function(query) {
+
+};
+
+Model.prototype.validate = function(fn, msg) {
+
+};
+
+module.exports = Model;</code></pre>
         </div>
       </div>
     </div>

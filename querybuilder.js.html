@@ -71,11 +71,11 @@
       <div class="row">
         <div class="span3 bs-docs-sidebar">
           <ul class="nav nav-list bs-docs-sidenav affix-top">
-            <li class="active"><a href="index.html">Main</a></li>
+            <li><a href="index.html">Main</a></li>
             <li><a href="document.js.html">document.js</a></li>
             <li><a href="model.js.html">model.js</a></li>
             <li><a href="query.js.html">query.js</a></li>
-            <li><a href="querybuilder.js.html">querybuilder.js</a></li>
+            <li class="active"><a href="querybuilder.js.html">querybuilder.js</a></li>
             <li><a href="utils.js.html">utils.js</a></li>
           </ul>
           <div class="scrollspy">
@@ -84,8 +84,116 @@
           </div>
         </div>
         <div class="span9">
-          <section id="Main"><h1>storm</h1>
-<p>Simple TDS ORM</p></section>
+          <div class="description"> </div>
+          <pre><code class="language-javascript">'use strict';
+
+var _ = require('underscore'),
+    tedious = require('tedious');
+
+var utils = require('./utils');
+
+// Generate a SELECT query from model
+module.exports.select = function(q) {
+  var sql = 'select';
+
+  if(q._limit)
+    sql += ' top ' + q._limit;
+
+  if(q._fields === '*' || _.isEmpty(q._fields))
+    sql += ' *';
+  else
+    sql += ' ' + _.map(q._fields, utils.quoteField).join(', ');
+
+  if(q._into)
+    sql += ' into ' + utils.quoteTable(q._into);
+
+  sql += ' from ' + utils.quoteTable(q._from);
+
+  if(!_.isEmpty(q._where)){
+    sql += ' where ' + generateSearch(q._where);
+  }
+
+  if(!_.isEmpty(q._groupBy)){
+    sql += ' group by ' + _.map(q._groupBy, utils.quoteField).join(', ');
+  }
+
+  if(!_.isEmpty(q._having)){
+    sql += ' having ' + generateSearch(q._having);
+  }
+
+  if(!_.isEmpty(q._orderBy)){
+    sql += ' order by ' + _.map(q._orderBy, function(criteria){
+      var str = utils.quoteField(criteria.column);
+
+      if(criteria.collation)
+        str += ' collate ' + criteria.collation;
+      if(criteria.order)
+        str += ' ' + criteria.order.toLowerCase();
+
+      return str;
+    }).join(', ');
+  }
+
+  if(q._skip)
+    sql += ' offset ' + q._skip + ' rows';
+
+  return sql + ';';
+};
+
+var generateSearch = function(search) {
+  return _.map(Object.keys(search), function(key){
+    var value = search[key];
+    if(key === '$or') {
+      return '(' + _.map(value, generateSearch).join(' or ') + ')';
+    }
+    else if(_.isArray(value)) {
+      if(!_.isEmpty(value))
+        return utils.quoteField(key) + ' in (' +
+          _.map(value, generateValue).join(', ') + ')';
+    }
+    else if(_.isObject(value) &amp;&amp; value.name &amp;&amp; value.value) { // Simple search
+      return utils.quoteField(key) + '=' + generateValue(value);
+    }
+    else if(_.isObject(value)){ // Compound search
+      key = utils.quoteField(key);
+      var params = [];
+      _.each(value, function(v, k){
+        var param = generateOperator(key, k, v);
+        if(param)
+          params.push(param);
+      });
+      return '(' + params.join(' and ') + ')';
+    }
+  }).join(' and ');
+};
+
+var generateValue = function(value){
+  if(value.name &amp;&amp; value.value)
+    return '@' + value.name;
+  else
+    throw new Error('Invalid value: ' + value + '. Must be a parameter');
+};
+
+var generateOperator = function(key, op, value){
+  switch(op){
+    case '$gt':
+      return key + '&gt;' + generateValue(value);
+    case '$gte':
+      return key + '&gt;=' + generateValue(value);
+    case '$lt':
+      return key + '&lt;' + generateValue(value);
+    case '$lte':
+      return key + '&lt;=' + generateValue(value);
+    case '$in':
+      return key + ' in (' + _.map(value, generateValue).join(', ') + ')';
+    case '$nin':
+      return key + ' not in (' + _.map(value, generateValue).join(', ') + ')';
+    case '$ne':
+      return key + '!=' + generateValue(value);
+    case '$null':
+      return key + ' is ' + (value ? '' : 'not ') + 'null';
+  }
+};</code></pre>
         </div>
       </div>
     </div>

@@ -71,12 +71,12 @@
       <div class="row">
         <div class="span3 bs-docs-sidebar">
           <ul class="nav nav-list bs-docs-sidenav affix-top">
-            <li class="active"><a href="index.html">Main</a></li>
+            <li><a href="index.html">Main</a></li>
             <li><a href="document.js.html">document.js</a></li>
             <li><a href="model.js.html">model.js</a></li>
             <li><a href="query.js.html">query.js</a></li>
             <li><a href="querybuilder.js.html">querybuilder.js</a></li>
-            <li><a href="utils.js.html">utils.js</a></li>
+            <li class="active"><a href="utils.js.html">utils.js</a></li>
           </ul>
           <div class="scrollspy">
             <ul class="nav nav-list bs-docs-sidenav affix-top">
@@ -84,8 +84,55 @@
           </div>
         </div>
         <div class="span9">
-          <section id="Main"><h1>storm</h1>
-<p>Simple TDS ORM</p></section>
+          <div class="description"> </div>
+          <pre><code class="language-javascript">'use strict';
+
+var _ = require('underscore');
+
+module.exports.quoteTable = function(tableName) {
+  var parts = tableName.split('.');
+
+  parts = _.map(parts, function(elem) {
+    if(elem[0] !== '[')
+      elem = '[' + elem + ']';
+    return elem;
+  });
+
+  return parts.join('.');
+};
+
+module.exports.quoteField = function(fieldName) {
+  if(fieldName[0] !== '[')
+    fieldName = '[' + fieldName + ']';
+
+  return fieldName;
+};
+
+module.exports.normalizeTable = function(tableName) {
+  if(!_.isString(tableName))
+    throw new Error('Invalid table name: &quot;' + tableName + '&quot;. Must be a string');
+
+  // If already quoted we unquote it
+  if(tableName[0] === '[')
+    tableName = tableName.substr(1, tableName.length - 1);
+
+  return tableName;
+};
+
+module.exports.normalizeField = function(fieldName) {
+  // If already quoted we unquote it
+  if(fieldName[0] === '[')
+    fieldName = fieldName.substr(1, fieldName.length - 1);
+
+  // Normalize to CamelCase
+  fieldName = fieldName.trim().replace(/[-_\.]+(.)?/g, function(match, c){
+    return c ? c.toUpperCase() : '';
+  });
+
+  fieldName = fieldName[0].toUpperCase() + fieldName.substr(1);
+
+  return fieldName;
+};</code></pre>
         </div>
       </div>
     </div>
