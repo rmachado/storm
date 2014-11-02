@@ -1,7 +1,9 @@
 'use strict';
 var expect = require('chai').expect;
 
-var Query = require('../lib/query');
+var db = require('../lib/db'),
+    Query = require('../lib/query'),
+    QueryParam = db.QueryParam;
 
 /* jshint ignore:start */
 
@@ -42,7 +44,7 @@ describe('SELECT', function(){
   });
 
   it('should generate a minimal filtered query', function(){
-    query.where({ 'active' : { name: 'isActive', value: true }});
+    query.where({ 'active' : new QueryParam('isActive', true)});
     var sql = 'select * from [User] where [Active]=@isActive;';
     expect(query._generateSQL()).to.be.equal(sql);
   });
@@ -60,7 +62,7 @@ describe('SELECT', function(){
   it('should generate a minimal grouped filtered query', function(){
     query
     .groupBy('name')
-    .having({ 'active' : { name: 'isActive', value: true }});
+    .having({ 'active' : new QueryParam('isActive', true)});
 
     var sql = 'select * from [User] group by [Name] having [Active]=@isActive;';
     expect(query._generateSQL()).to.be.equal(sql);
@@ -70,19 +72,19 @@ describe('SELECT', function(){
     query
       .select(['id', 'name', 'last_modified'])
       .where({
-        'active': { name: 'active', value: true },
+        'active': new QueryParam('isActive', true),
         '$or' : [
-          { 'type' : { name: 'typeBusiness', value: 'business' }},
+          { 'type' : new QueryParam('typeBusiness', 'business')},
           {
-            'type' : { name: 'typeClient', value: 'client' },
-            'verified': { name: 'verified', value: true }
+            'type' : new QueryParam('typeClient', 'client'),
+            'verified': new QueryParam('verified', true)
           }
         ]
       })
       .limit(10);
 
     var sql = 'select top 10 [Id], [Name], [LastModified] ' +
-      'from [User] where [Active]=@active and ([Type]=@typeBusiness or ' +
+      'from [User] where [Active]=@isActive and ([Type]=@typeBusiness or ' +
       '[Type]=@typeClient and [Verified]=@verified);'
     expect(query._generateSQL()).to.be.equal(sql);
   });
@@ -107,12 +109,12 @@ describe('SELECT', function(){
     .into('MyReport')
     .select(['name', 'active'])
     .where({
-      'type': { name: 'typeClient', value: 'client'},
-      'verified': { name: 'isVerified', value: 'verified' }
+      'type': new QueryParam('typeClient', 'client'),
+      'verified': new QueryParam('isVerified', true)
     })
     .groupBy('birth_date')
     .having({
-      'birth_date': { name: 'birthDate', value: new Date(1990, 1, 1) }
+      'birth_date': new QueryParam('birthDate', new Date(1990, 1, 1))
     })
     .sort(['name', { column: 'active', order: 'desc' }])
     .limit(5)
@@ -131,12 +133,12 @@ describe('SELECT', function(){
       into: 'MyReport',
       from: 'User',
       where: {
-        'type': { name: 'typeClient', value: 'client'},
-        'verified': { name: 'isVerified', value: 'verified' }
+        'type': new QueryParam('typeClient', 'client'),
+        'verified': new QueryParam('isVerified', true)
       },
       groupBy: 'birth_date',
       having: {
-        'birth_date': { name: 'birthDate', value: new Date(1990, 1, 1) }
+        'birth_date': new QueryParam('birthDate', new Date(1990, 1, 1))
       },
       sort: ['name', { column: 'active', order: 'desc' }],
       limit: 5,
@@ -152,19 +154,19 @@ describe('SELECT', function(){
   it('should generate a query using query operators', function(){
     query.where({
       $or: [
-        { 'type': { name: 'typeBusiness', value: 'business' }},
-        { 'type': { name: 'typeClient', value: 'client' },
-          'verified': { name: 'isVerified', value: true }
+        { 'type': new QueryParam('typeBusiness', 'business')},
+        { 'type': new QueryParam('typeClient', 'client'),
+          'verified': new QueryParam('isVerified', true)
         }
       ],
       'name': { $null: false },
-      'age': { $gte: { name: 'minAge', value: 18},
-               $lt: { name: 'maxAge', value: 50 } },
-      'active': { name: 'isActive', value: true },
-      'alert_level': [{ name: 'lowLevel', value: 1 },
-                      { name: 'mediumLevel', value: 2 }],
-      'status': { $nin: [{ name: 'statusBlocked', value: 'blocked'},
-                         { name: 'statusDeleted', value: 'deleted' }]}
+      'age': { $gte: new QueryParam('minAge', 18),
+               $lt: new QueryParam('maxAge', 50) },
+      'active': new QueryParam('isActive', true),
+      'alert_level': [new QueryParam('lowLevel', 1),
+                      new QueryParam('mediumLevel', 2)],
+      'status': { $nin: [new QueryParam('statusBlocked', 'blocked'),
+                         new QueryParam('statusDeleted', 'deleted')]}
     });
 
     var sql = 'select * from [User] where ([Type]=@typeBusiness or ' +
