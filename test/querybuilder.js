@@ -211,6 +211,18 @@ describe('UPDATE', function(){
     expect(query._generateSQL()).to.be.equal(sql);
   });
 
+  it('should generate an update query with mixed values', function(){
+    query.set({
+      'birth_date': '$currentDate',
+      'verified': null,
+      'alert_level': QueryParam.DEFAULT
+    });
+
+    var sql = 'update [User] set [BirthDate]=GETDATE(), [Verified]=NULL, ' +
+      '[AlertLevel]=DEFAULT;';
+    expect(query._generateSQL()).to.be.equal(sql);
+  });
+
   it('should generate an update query for some top results', function(){
     query
     .set({ 'active': new QueryParam('isActive', false) })
@@ -267,11 +279,12 @@ describe('INSERT', function(){
     .set({
       'name': new QueryParam('name', 'John Snow'),
       'active': QueryParam.DEFAULT,
-      'birth_date': null
+      'birth_date': '$currentDate',
+      'verified': null
     });
 
-    var sql = 'insert into [User] ([Name], [Active], [BirthDate]) ' +
-      'values (@name, DEFAULT, NULL);';
+    var sql = 'insert into [User] ([Name], [Active], [BirthDate], [Verified]) ' +
+      'values (@name, DEFAULT, GETDATE(), NULL);';
     expect(query._generateSQL()).to.be.equal(sql);
   });
 
