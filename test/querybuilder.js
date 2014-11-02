@@ -223,4 +223,25 @@ describe('UPDATE', function(){
   });
 });
 
+describe('DELETE', function(){
+
+  beforeEach(function(){
+    query = new Query('delete', { from : 'User' });
+  });
+
+  it('should generaete a minimal query that deletes all the rows', function(){
+    var sql = 'delete from [User];';
+    expect(query._generateSQL()).to.be.equal(sql);
+  });
+
+  it('should generate a query that deletes the top results of a seasrch', function(){
+    query
+    .where({ 'active' : new QueryParam('isActive', false) })
+    .limit(10);
+
+    var sql = 'delete top(10) from [User] where [Active]=@isActive;';
+    expect(query._generateSQL()).to.be.equal(sql);
+  });
+});
+
 /* jshint ignore:end */
