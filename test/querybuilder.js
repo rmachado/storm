@@ -12,7 +12,7 @@ var query = null;
 describe('SELECT', function(){
 
   beforeEach(function(){
-    query = new Query('select', { from : 'User' });
+    query = new Query.Select('User');
   });
 
   it('should generate a minimal query that selects everything', function(){
@@ -182,7 +182,7 @@ describe('SELECT', function(){
 describe('UPDATE', function(){
 
   beforeEach(function(){
-    query = new Query('update', { from : 'User' });
+    query = new Query.Update('User');
   });
 
   it('should fail attempting an update without a SET clause', function(){
@@ -226,7 +226,7 @@ describe('UPDATE', function(){
 describe('DELETE', function(){
 
   beforeEach(function(){
-    query = new Query('delete', { from : 'User' });
+    query = new Query.Delete('User');
   });
 
   it('should generate a minimal query that deletes all the rows', function(){
@@ -247,7 +247,7 @@ describe('DELETE', function(){
 describe('INSERT', function(){
 
   beforeEach(function(){
-    query = Query.Insert().into('User');
+    query = Query.Insert('User');
   });
 
   it('should fail if no data is provided', function(){
