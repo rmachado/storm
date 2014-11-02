@@ -229,12 +229,12 @@ describe('DELETE', function(){
     query = new Query('delete', { from : 'User' });
   });
 
-  it('should generaete a minimal query that deletes all the rows', function(){
+  it('should generate a minimal query that deletes all the rows', function(){
     var sql = 'delete from [User];';
     expect(query._generateSQL()).to.be.equal(sql);
   });
 
-  it('should generate a query that deletes the top results of a seasrch', function(){
+  it('should generate a query that deletes the top results of a search', function(){
     query
     .where({ 'active' : new QueryParam('isActive', false) })
     .limit(10);
@@ -242,6 +242,49 @@ describe('DELETE', function(){
     var sql = 'delete top(10) from [User] where [Active]=@isActive;';
     expect(query._generateSQL()).to.be.equal(sql);
   });
+});
+
+describe('INSERT', function(){
+
+  beforeEach(function(){
+    query = Query.Insert().into('User');
+  });
+
+  it('should fail if no data is provided', function(){
+    expect(query._generateSQL).to.throw(Error);
+  });
+
+  it('should generate a minimal insert query', function(){
+    query
+    .set({ 'name' : new QueryParam('name', 'John Snow') })
+
+    var sql = 'insert into [User] ([Name]) values (@name);';
+    expect(query._generateSQL()).to.be.equal(sql);
+  });
+
+  it('should generate an insert query with mixed values', function(){
+    query
+    .set({
+      'name': new QueryParam('name', 'John Snow'),
+      'active': QueryParam.DEFAULT,
+      'birth_date': null
+    });
+
+    var sql = 'insert into [User] ([Name], [Active], [BirthDate]) ' +
+      'values (@name, DEFAULT, NULL);';
+    expect(query._generateSQL()).to.be.equal(sql);
+  });
+
+  it('should generate an insert query containing TOP', function(){
+    query
+    .set({
+      'name': new QueryParam('name', 'John Snow')
+    })
+    .limit(5);
+
+    var sql = 'insert top(5) into [User] ([Name]) values (@name);';
+    expect(query._generateSQL()).to.be.equal(sql);
+  })
 });
 
 /* jshint ignore:end */
