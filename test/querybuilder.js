@@ -170,13 +170,57 @@ describe('SELECT', function(){
     });
 
     var sql = 'select * from [User] where ([Type]=@typeBusiness or ' +
-      '[Type]=@typeClient and [Verified]=@isVerified) and ([Name] is not null) ' +
+      '[Type]=@typeClient and [Verified]=@isVerified) and [Name] is not null ' +
       'and ([Age]>=@minAge and [Age]<@maxAge) and [Active]=@isActive and ' +
-      '[AlertLevel] in (@lowLevel, @mediumLevel) and ([Status] not in ' +
-      '(@statusBlocked, @statusDeleted));'
+      '[AlertLevel] in (@lowLevel, @mediumLevel) and [Status] not in ' +
+      '(@statusBlocked, @statusDeleted);'
     expect(query._generateSQL()).to.be.equal(sql);
   });
 
+});
+
+describe('UPDATE', function(){
+
+  beforeEach(function(){
+    query = new Query('update', { from : 'User' });
+  });
+
+  it('should fail attempting an update without a SET clause', function(){
+    expect(query._generateSQL).to.throw(Error);
+  });
+
+  it('should generate a simple update query', function(){
+    query.set({ 'name': new QueryParam('name', 'test') });
+
+    var sql = 'update [User] set [Name]=@name;';
+    expect(query._generateSQL()).to.be.equal(sql);
+  });
+
+  it('should generate an update query with some operators', function(){
+    query.set({
+      'alert_level': { '$inc': new QueryParam('alertInc', 1) },
+      'active': { '$and': new QueryParam('isActive', true) },
+      'credits': {
+        '$mul': new QueryParam('creditMul', 5),
+        '$dec': new QueryParam('creditDec', 4)
+      }
+    });
+
+    var sql = 'update [User] set [AlertLevel]+=@alertInc, [Active]&=@isActive, ' +
+      '[Credits]*=@creditMul, [Credits]-=@creditDec;'
+    expect(query._generateSQL()).to.be.equal(sql);
+  });
+
+  it('should generate an update query for some top results', function(){
+    query
+    .set({ 'active': new QueryParam('isActive', false) })
+    .where({ 'alert_level': { '$lte': new QueryParam('minAlert', 2) }})
+    .limit(10);
+
+    var sql = 'update top(10) [User] set [Active]=@isActive ' +
+      'where [AlertLevel]<=@minAlert;'
+    expect(query._generateSQL()).to.be.equal(sql);
+  });
 });
 
 /* jshint ignore:end */
